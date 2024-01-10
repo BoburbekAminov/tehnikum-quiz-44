@@ -1,23 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Heading } from "../components/Heading";
-// import { LinkButton } from "../components/LinkButton";
-// import { Input } from "../components/Input";
-import { Controller, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { AppInput } from "../components/UI/AppInput";
 import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { ThemeContext, themes } from "../contexts/themeContexts";
 
-const regexUzbNumber = /^(?:\+998)?(?:\d{2})?(?:\d{7})$/;
-
-const welcomeFormSchema = yup.object({
-  username: yup.string().required("Обязательное поле!"),
-  userphone: yup
-    .string()
-    .matches(regexUzbNumber, "Введите узбекский номер телефона!")
-    .required("Обязательное поле!"),
-});
 const Welcome = () => {
   const navigate = useNavigate();
 
@@ -27,24 +15,18 @@ const Welcome = () => {
   const [nameError, setNameError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(welcomeFormSchema),
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       username: "",
-      userphone: "",
+      phone: "",
     },
   });
 
-  const onWelcomeSubmit = (data) => {
-    console.table(data);
-  };
+  console.log("theme", theme);
 
-  const goToNextPage = () => {
-    if (nameError && phoneError) {
+  const goNextPage = () => {
+    if (nameValue && phoneValue) {
       navigate("/step-one");
     }
   };
@@ -56,6 +38,7 @@ const Welcome = () => {
       setNameError(false);
     }
   };
+
   const validatePhone = () => {
     if (!phoneValue) {
       setPhoneError(true);
@@ -68,6 +51,7 @@ const Welcome = () => {
     setNameValue(value);
     validateName();
   };
+
   const handlePhoneInput = (value) => {
     setPhoneValue(value);
     validatePhone();
@@ -76,65 +60,70 @@ const Welcome = () => {
   const clickHandler = () => {
     validateName();
     validatePhone();
-
-    goToNextPage();
+    // const step1 = {
+    //   name: nameValue,
+    //   phoneNumber: phoneValue,
+    // };
+    goNextPage();
   };
-  // console.log(errors, "errors");
+
+  const onAcceptSubmit = (data) => {
+    console.log(data);
+  };
 
   return (
-    <div className="container">
+    <div className={`container ${theme === themes.dark && "_dark"}`}>
       <div className="wrapper">
         <div className="welcome">
+          <button type="button" onClick={toggleTheme}>
+            Switch Theme
+          </button>
           <Heading
             text="Добро пожаловать в квиз от лучшего учебного центра"
             headingType="h1"
           />
-          <form onSubmit={handleSubmit(onWelcomeSubmit)}>
-           
+          <form
+            className="welcome__form"
+            onSubmit={handleSubmit(onAcceptSubmit)}
+          >
             <Controller
               name="username"
               control={control}
               render={({ field }) => (
-                <AppInput
+                <Input
+                  hasError={nameError}
                   value={nameValue}
                   onChange={(value) => handleNameInput(value)}
-                  id="username"
+                  id="usernam e"
                   isRequired
                   inputLabel="Ваше имя"
                   inputPlaceholder="Ваш ответ"
-                  errorMessage={errors.username?.message}
-                  hasError={errors.username ? true : false}
+                  errorMessage="Введите ваше имя"
                   {...field}
                 />
               )}
             />
             <Controller
-              name="userphone"
+              name="phone"
               control={control}
               render={({ field }) => (
-                <AppInput
+                <Input
+                  hasError={phoneError}
                   value={phoneValue}
                   onChange={(value) => handlePhoneInput(value)}
-                  id="userphone"
-                  type="tel"
+                  id="phone"
                   isRequired
                   inputLabel="Ваш номер"
-                  inputPlaceholder="+998 9- --- -- --"
-                  errorMessage={errors.userphone?.message}
-                  hasError={errors.userphone ? true : false}
+                  inputPlaceholder="+998 9- --- -- -- "
+                  errorMessage="Введите номер в правильном формате"
                   {...field}
                 />
               )}
             />
-
-            {/* <LinkButton
-              buttonType="submit"
-              onClick={clickHandler}
-            /> */}
             <Button
-              isDisabled={!!Object.keys(errors).length}
-              onClick={clickHandler}
               buttonType="submit"
+              buttonText="Далее"
+              onClick={clickHandler}
             />
           </form>
         </div>

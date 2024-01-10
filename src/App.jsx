@@ -1,5 +1,6 @@
 import React from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "./contexts/themeProvider";
 import StepFour from "./pages/StepFour";
 import StepOne from "./pages/StepOne";
 import StepThree from "./pages/StepThree";
@@ -43,7 +44,9 @@ const routerConfig = createBrowserRouter([
 const App = () => {
   return (
     <div className="App">
-      <RouterProvider router={routerConfig} />
+      <ThemeProvider>
+        <RouterProvider router={routerConfig} />
+      </ThemeProvider>
     </div>
   );
 };

@@ -3,12 +3,33 @@ import { ProgressBar } from "../components/ProgressBar";
 import { AnswerItem } from "../components/AnswerItem";
 import { Heading } from "../components/Heading";
 import { LinkButton } from "../components/LinkButton";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+const stepOneFormSchema = yup.object({
+  useranswer: yup.string().required("Введите ответ в правильном формате"),
+});
 
 const StepTwo = () => {
+  const navigate = useNavigate();
+
   const [checkedAnswer, setCheckedAnswer] = useState(null);
 
   const [phoneValue, setPhoneValue] = useState("");
   const [phoneError, setPhoneError] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(stepOneFormSchema),
+    defaultValues: {
+      useranswer: "",
+    },
+  });
 
   const clickHandler = () => {
     if (!phoneValue) {
@@ -51,12 +72,18 @@ const StepTwo = () => {
             <Heading text="1. Занимательный вопрос" headingType="h2" />
             <ul className="variants">
               {variants.map((elem) => (
-                <AnswerItem
-                  key={elem.id}
-                  id={elem.id}
-                  AnswerLabel={elem.AnswerLabel}
-                  onChange={() => setCheckedAnswer(elem.id)}
-                  isChecked={elem.id === checkedAnswer}
+                <Controller
+                  name="useranswer"
+                  control={control}
+                  render={({ field }) => (
+                    <AnswerItem
+                      key={elem.id}
+                      id={elem.id}
+                      AnswerLabel={elem.AnswerLabel}
+                      onChange={() => setCheckedAnswer(elem.id)}
+                      isChecked={elem.id === checkedAnswer}
+                    />
+                  )}
                 />
               ))}
             </ul>
